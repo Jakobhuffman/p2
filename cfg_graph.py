@@ -130,21 +130,14 @@ def safe_filename(name):
 
 
 def main():
-    if len(sys.argv) != 2:
-        print("usage: graph <input.ll>", file=sys.stderr)
-        return 1
+    
 
     input_filename = sys.argv[1]
-    if not os.path.exists(input_filename):
-        print("graph: file not found: " + input_filename, file=sys.stderr)
-        return 1
+    
 
     with open(input_filename, "r", encoding="utf-8") as input_file:
         functions = get_functions(input_file.readlines())
 
-    if len(functions) == 0:
-        print("graph: no functions found", file=sys.stderr)
-        return 1
 
     dots = []
 
