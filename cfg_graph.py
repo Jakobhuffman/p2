@@ -117,18 +117,6 @@ def make_dot(blocks, edges):
     return "\n".join(lines) + "\n"
 
 
-def safe_filename(name):
-    result = ""
-
-    for character in name:
-        if character.isalnum() or character in "_.-":
-            result += character
-        else:
-            result += "_"
-
-    return result
-
-
 def main():
     
 
@@ -145,7 +133,7 @@ def main():
         blocks, labels = get_blocks(function_lines)
         edges = get_edges(blocks, labels)
         dot = make_dot(blocks, edges)
-        output_filename = safe_filename(function_name) + ".dot"
+        output_filename = function_name + ".dot"
 
         with open(output_filename, "w", encoding="utf-8") as output_file:
             output_file.write(dot)
