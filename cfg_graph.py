@@ -100,7 +100,7 @@ def get_edges(blocks, labels):
     return edges
 
 
-def make_dot(blocks, edges):
+def make_dot_graph(blocks, edges):
     lines = ["digraph {"]
 
     for block_number in range(len(blocks)):
@@ -129,11 +129,11 @@ def main():
 
     dots = []
 
-    for function_name, function_lines in functions:
-        blocks, labels = get_blocks(function_lines)
+    for func_name, after_name in functions:
+        blocks, labels = get_blocks(after_name)
         edges = get_edges(blocks, labels)
-        dot = make_dot(blocks, edges)
-        output_filename = function_name + ".dot"
+        dot = make_dot_graph(blocks, edges)
+        output_filename = func_name + ".dot"
 
         with open(output_filename, "w", encoding="utf-8") as output_file:
             output_file.write(dot)

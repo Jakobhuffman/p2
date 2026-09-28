@@ -1,2 +1,4 @@
-I discussed the assignment and implementation with OpenAI Codex.
-No other collaborators.
+The python sciprt takes a file input in this case a llvm program 
+once we read the file line by line we will send it to the get_function function
+this is where we strip the code and find the start of each funciton and then
+store the header and the contents of each label 
