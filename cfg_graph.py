@@ -15,28 +15,28 @@ def get_func_name(line):
 
 
 def get_func(lines):
-    functions = []
-    function_name = None
-    function_lines = []
-    inside_function = False
+    func = []
+    func_name = None
+    func_lines = []
+    inside_func = False
 
     for line in lines:
         line = line.strip()
 
-        if not inside_function:
+        if not inside_func:
             if line.startswith("define ") and "{" in line:
-                function_name = get_func_name(line)
-                function_lines = []
-                inside_function = True
+                func_name = get_func_name(line)
+                func_lines = []
+                inside_func = True
             continue
 
         if line == "}":
-            functions.append((function_name, function_lines))
-            inside_function = False
+            func.append((func_name, func_lines))
+            inside_func = False
         elif line != "":
-            function_lines.append(line)
+            func_lines.append(line)
 
-    return functions
+    return func
 
 
 def get_blocks(function_lines):
@@ -64,21 +64,21 @@ def get_blocks(function_lines):
     return blocks, labels
 
 
-def get_branch_labels(instruction):
+def get_br_labels(instruction):
     if not instruction.startswith("br "):
         return []
 
     words = instruction.replace(",", " ").split()
-    branch_labels = []
+    br_labels = []
 
     for index in range(len(words) - 1):
         if words[index] == "label":
             label = words[index + 1]
             if label.startswith("%"):
                 label = label[1:]
-            branch_labels.append(label)
+            br_labels.append(label)
 
-    return branch_labels
+    return br_labels
 
 
 def get_edges(blocks, labels):
@@ -90,10 +90,10 @@ def get_edges(blocks, labels):
             continue
 
         last_instruction = block[-1]
-        branch_labels = get_branch_labels(last_instruction)
+        br_labels = get_br_labels(last_instruction)
 
-        for edge_number in range(len(branch_labels)):
-            label = branch_labels[edge_number]
+        for edge_number in range(len(br_labels)):
+            label = br_labels[edge_number]
             if label in labels:
                 edges.append((block_number, labels[label], edge_number))
 
