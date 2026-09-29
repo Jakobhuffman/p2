@@ -4,7 +4,7 @@ import os
 import sys
 
 
-def get_function_name(line):
+def get_func_name(line):
     at_sign = line.find("@")
     open_parenthesis = line.find("(", at_sign)
 
@@ -14,7 +14,7 @@ def get_function_name(line):
     return line[at_sign + 1:open_parenthesis].strip()
 
 
-def get_functions(lines):
+def get_func(lines):
     functions = []
     function_name = None
     function_lines = []
@@ -25,7 +25,7 @@ def get_functions(lines):
 
         if not inside_function:
             if line.startswith("define ") and "{" in line:
-                function_name = get_function_name(line)
+                function_name = get_func_name(line)
                 function_lines = []
                 inside_function = True
             continue
@@ -124,12 +124,12 @@ def main():
     
 
     with open(input_filename, "r", encoding="utf-8") as input_file:
-        functions = get_functions(input_file.readlines())
+        func = get_func(input_file.readlines())
 
 
     dots = []
 
-    for func_name, after_name in functions:
+    for func_name, after_name in func:
         blocks, labels = get_blocks(after_name)
         edges = get_edges(blocks, labels)
         dot = make_dot_graph(blocks, edges)
