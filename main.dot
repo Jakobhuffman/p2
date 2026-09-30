@@ -1,7 +1,10 @@
 digraph {
-    Node0 [shape=record,label=""];
-    Node1 [shape=record,label=""];
-    Node2 [shape=record,label=""];
+    Node0 [shape=record,label="%noArgs = icmp eq i32 %argc, 1\lbr i1 %noArgs, label %lbl_t, label %lbl_f\l"];
+    Node1 [shape=record,label="%varT = add i32 1, 0\lbr label %end\l"];
+    Node2 [shape=record,label="%varF = add i32 2, 0\lbr label %end\l"];
+    Node3 [shape=record,label="%var = phi i32 [%varT, %lbl_t], [%varF, %lbl_f]\lret i32 %var\l"];
     Node0 -> Node1 [label=0];
     Node0 -> Node2 [label=1];
+    Node1 -> Node3 [label=0];
+    Node2 -> Node3 [label=0];
 }

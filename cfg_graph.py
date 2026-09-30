@@ -21,7 +21,7 @@ def get_func(lines):
     inside_func = False
 
     for line in lines:
-        line = line.strip()
+        line = line.split(";", 1)[0].strip()
 
         if not inside_func:
             if line.startswith("define ") and "{" in line:
@@ -39,6 +39,26 @@ def get_func(lines):
     return func
 
 
+def is_call_instruction(instruction):
+    instruction = instruction.strip()
+
+    if "=" in instruction:
+        instruction = instruction.split("=", 1)[1].strip()
+
+    words = instruction.split()
+    if len(words) == 0:
+        return False
+
+    if words[0] == "call":
+        return True
+
+    return (
+        len(words) > 1
+        and words[0] in ("tail", "musttail", "notail")
+        and words[1] == "call"
+    )
+
+
 def get_blocks(function_lines):
     blocks = []
     labels = {}
@@ -54,9 +74,13 @@ def get_blocks(function_lines):
             if current_block is None:
                 current_block = len(blocks)
                 blocks.append([])
-                labels["entry"] = current_block
+                if current_block == 0:
+                    labels["entry"] = current_block
 
             blocks[current_block].append(line)
+
+            if is_call_instruction(line):
+                current_block = None
 
     if len(blocks) == 0:
         blocks.append([])
@@ -90,21 +114,58 @@ def get_edges(blocks, labels):
             continue
 
         last_instruction = block[-1]
-        br_labels = get_br_labels(last_instruction)
 
-        for edge_number in range(len(br_labels)):
-            label = br_labels[edge_number]
-            if label in labels:
-                edges.append((block_number, labels[label], edge_number))
+        if is_call_instruction(last_instruction):
+            return_site = block_number + 1
+            if return_site < len(blocks):
+                edges.append((block_number, return_site, 0))
+        else:
+            br_labels = get_br_labels(last_instruction)
+
+            for edge_number in range(len(br_labels)):
+                label = br_labels[edge_number]
+                if label in labels:
+                    edges.append((block_number, labels[label], edge_number))
 
     return edges
+
+
+def escape_record_label(text):
+    escaped = ""
+
+    for character in text:
+        if character == "\\":
+            escaped += "\\\\"
+        elif character == '"':
+            escaped += '\\"'
+        elif character in "{}|<>":
+            escaped += "\\" + character
+        else:
+            escaped += character
+
+    return escaped
+
+
+def make_block_label(block):
+    if len(block) == 0:
+        return ""
+
+    escaped_instructions = []
+
+    for instruction in block:
+        escaped_instructions.append(escape_record_label(instruction))
+
+    return "\\l".join(escaped_instructions) + "\\l"
 
 
 def make_dot_graph(blocks, edges):
     lines = ["digraph {"]
 
     for block_number in range(len(blocks)):
-        lines.append('    Node{} [shape=record,label=""];'.format(block_number))
+        label = make_block_label(blocks[block_number])
+        lines.append(
+            '    Node{} [shape=record,label="{}"];'.format(block_number, label)
+        )
 
     for source, destination, edge_number in edges:
         lines.append(
