@@ -6,12 +6,12 @@ import sys
 
 def get_func_name(line):
     at_sign = line.find("@")
-    open_parenthesis = line.find("(", at_sign)
+    open_par = line.find("(", at_sign)
 
-    if at_sign == -1 or open_parenthesis == -1:
+    if at_sign == -1 or open_par == -1:
         return None
 
-    return line[at_sign + 1:open_parenthesis].strip()
+    return line[at_sign + 1:open_par].strip()
 
 
 def get_func(lines):
@@ -39,13 +39,12 @@ def get_func(lines):
     return func
 
 
-def is_call_instruction(instruction):
-    instruction = instruction.strip()
+def is_call_instruc(instruc):
+    instruc = instruc.strip()
 
-    if "=" in instruction:
-        instruction = instruction.split("=", 1)[1].strip()
-
-    words = instruction.split()
+    if "=" in instruc:
+        instruc = instruc.split("=", 1)[1].strip()
+    words = instruc.split()
     if len(words) == 0:
         return False
 
@@ -59,12 +58,12 @@ def is_call_instruction(instruction):
     )
 
 
-def get_blocks(function_lines):
+def get_blocks(func_lines):
     blocks = []
     labels = {}
     current_block = None
 
-    for line in function_lines:
+    for line in func_lines:
         if line.endswith(":"):
             label = line[:-1].strip()
             current_block = len(blocks)
@@ -79,7 +78,7 @@ def get_blocks(function_lines):
 
             blocks[current_block].append(line)
 
-            if is_call_instruction(line):
+            if is_call_instruc(line):
                 current_block = None
 
     if len(blocks) == 0:
@@ -88,11 +87,11 @@ def get_blocks(function_lines):
     return blocks, labels
 
 
-def get_br_labels(instruction):
-    if not instruction.startswith("br "):
+def get_br_labels(instruc):
+    if not instruc.startswith("br "):
         return []
 
-    words = instruction.replace(",", " ").split()
+    words = instruc.replace(",", " ").split()
     br_labels = []
 
     for index in range(len(words) - 1):
@@ -113,14 +112,14 @@ def get_edges(blocks, labels):
         if len(block) == 0:
             continue
 
-        last_instruction = block[-1]
+        last_instruc = block[-1]
 
-        if is_call_instruction(last_instruction):
+        if is_call_instruc(last_instruc):
             return_site = block_number + 1
             if return_site < len(blocks):
                 edges.append((block_number, return_site, 0))
         else:
-            br_labels = get_br_labels(last_instruction)
+            br_labels = get_br_labels(last_instruc)
 
             for edge_number in range(len(br_labels)):
                 label = br_labels[edge_number]
@@ -133,15 +132,15 @@ def get_edges(blocks, labels):
 def escape_record_label(text):
     escaped = ""
 
-    for character in text:
-        if character == "\\":
+    for char in text:
+        if char == "\\":
             escaped += "\\\\"
-        elif character == '"':
+        elif char == '"':
             escaped += '\\"'
-        elif character in "{}|<>":
-            escaped += "\\" + character
+        elif char in "{}|<>":
+            escaped += "\\" + char
         else:
-            escaped += character
+            escaped += char
 
     return escaped
 
@@ -149,28 +148,27 @@ def escape_record_label(text):
 def make_block_label(block):
     if len(block) == 0:
         return ""
+    esc_instruc = []
 
-    escaped_instructions = []
+    for instruc in block:
+        esc_instruc.append(escape_record_label(instruc))
 
-    for instruction in block:
-        escaped_instructions.append(escape_record_label(instruction))
-
-    return "\\l".join(escaped_instructions) + "\\l"
+    return "\\l".join(esc_instruc) + "\\l"
 
 
 def make_dot_graph(blocks, edges):
     lines = ["digraph {"]
 
-    for block_number in range(len(blocks)):
-        label = make_block_label(blocks[block_number])
+    for block_num in range(len(blocks)):
+        label = make_block_label(blocks[block_num])
         lines.append(
-            '    Node{} [shape=record,label="{}"];'.format(block_number, label)
+            '    Node{} [shape=record,label="{}"];'.format(block_num, label)
         )
 
-    for source, destination, edge_number in edges:
+    for source, destination, edge_num in edges:
         lines.append(
             "    Node{} -> Node{} [label={}];".format(
-                source, destination, edge_number
+                source, destination, edge_num
             )
         )
 
