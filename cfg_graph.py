@@ -53,7 +53,6 @@ def is_call_instruc(instruc):
 
     return (
         len(words) > 1
-        and words[0] in ("tail", "musttail", "notail")
         and words[1] == "call"
     )
 

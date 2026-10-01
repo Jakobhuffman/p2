@@ -1,3 +1,0 @@
-digraph {
-    Node0 [shape=record,label="ret i32 10\l"];
-}
