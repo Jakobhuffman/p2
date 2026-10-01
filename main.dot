@@ -1,0 +1,9 @@
+digraph {
+    Node0 [shape=record,label="%x = call i32 @foo()\l"];
+    Node1 [shape=record,label="%test = icmp eq i32 %x, 10\lbr i1 %test, label %good, label %bad\l"];
+    Node2 [shape=record,label="ret i32 1\l"];
+    Node3 [shape=record,label="ret i32 0\l"];
+    Node0 -> Node1 [label=0];
+    Node1 -> Node2 [label=0];
+    Node1 -> Node3 [label=1];
+}

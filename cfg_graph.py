@@ -128,20 +128,20 @@ def get_edges(blocks, labels):
     return edges
 
 
-def escape_record_label(text):
-    escaped = ""
+def escape_record_label(txt):
+    esc = ""
 
-    for char in text:
+    for char in txt:
         if char == "\\":
-            escaped += "\\\\"
+            esc += "\\\\"
         elif char == '"':
-            escaped += '\\"'
+            esc += '\\"'
         elif char in "{}|<>":
-            escaped += "\\" + char
+            esc += "\\" + char
         else:
-            escaped += char
+            esc += char
 
-    return escaped
+    return esc
 
 
 def make_block_label(block):
@@ -176,31 +176,22 @@ def make_dot_graph(blocks, edges):
 
 
 def main():
-    
-
     input_filename = sys.argv[1]
     
-
     with open(input_filename, "r", encoding="utf-8") as input_file:
         func = get_func(input_file.readlines())
 
-
     dots = []
-
     for func_name, after_name in func:
         blocks, labels = get_blocks(after_name)
         edges = get_edges(blocks, labels)
         dot = make_dot_graph(blocks, edges)
         output_filename = func_name + ".dot"
-
         with open(output_filename, "w", encoding="utf-8") as output_file:
             output_file.write(dot)
-
         dots.append(dot)
 
-    if len(dots) == 1:
-        print(dots[0], end="")
-
+    
     return 0
 
 
